@@ -1,0 +1,50 @@
+const productsData = `[
+    {"id": 1, "name": "Laptop", "category": "Electronics", "price": 1000, "available": true},
+    {"id": 2, "name": "Coffee Maker", "category": "Appliances", "price": 50, "available": false},
+    {"id": 3, "name": "Smartphone", "category": "Electronics", "price": 700, "available": true},
+    {"id": 4, "name": "Desk Chair", "category": "Furniture", "price": 150, "available": true}
+  ]`;
+  
+  function parseJSONData(data) {
+    try {
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("Error parsing JSON data:", error);
+      return null;
+    }
+  }
+  
+  let products = parseJSONData(productsData);
+  
+  function addProduct(newProduct) {
+    products.push(newProduct);
+    console.log("Product added:", newProduct);
+  }
+  
+  function updateProductPrice(productId, newPrice) {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      product.price = newPrice;
+      console.log(`Price updated for product ID ${productId}:`, product);
+    } else {
+      console.error("Product not found.");
+    }
+  }
+  
+  function filterAvailableProducts() {
+    return products.filter(p => p.available);
+  }
+  
+  function filterProductsByCategory(category) {
+    return products.filter(p => p.category.toLowerCase() === category.toLowerCase());
+  }
+  
+  
+  addProduct({ id: 5, name: "Tablet", category: "Electronics", price: 300, available: true });
+  
+  updateProductPrice(3, 650);
+  
+  console.log("Available products:", filterAvailableProducts());
+  
+  console.log("Electronics products:", filterProductsByCategory("Electronics"));
+  
