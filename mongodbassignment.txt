@@ -1,0 +1,208 @@
+1. Creating the Collections and Insert Data:
+
+db.customers.insertMany([
+  { "_id": 1, "name": "John Doe", "email": "johndoe@example.com", "address": { "street": "123 Main St", "city": "Springfield", "zipcode": "12345" }, "phone": "555-1234", "registration_date": ISODate("2023-01-01T12:00:00Z") },
+  { "_id": 2, "name": "Jane Smith", "email": "janesmith@example.com", "address": { "street": "456 Elm St", "city": "Shelbyville", "zipcode": "67890" }, "phone": "555-5678", "registration_date": ISODate("2023-02-01T12:00:00Z") },
+  { "_id": 3, "name": "Alice Brown", "email": "alicebrown@example.com", "address": { "street": "789 Oak St", "city": "Capital City", "zipcode": "11223" }, "phone": "555-8765", "registration_date": ISODate("2023-03-01T12:00:00Z") },
+  { "_id": 4, "name": "Charlie Green", "email": "charliegreen@example.com", "address": { "street": "101 Pine St", "city": "Springfield", "zipcode": "33445" }, "phone": "555-4321", "registration_date": ISODate("2023-04-01T12:00:00Z") },
+  { "_id": 5, "name": "Emily White", "email": "emilywhite@example.com", "address": { "street": "202 Maple St", "city": "Shelbyville", "zipcode": "55667" }, "phone": "555-6789", "registration_date": ISODate("2023-05-01T12:00:00Z") }
+]);
+
+// Create the orders collection and insert data with numeric customer_id
+db.orders.insertMany([
+  { "_id": 1, "order_id": "ORD123456", "customer_id": 1, "order_date": ISODate("2023-05-15T14:00:00Z"), "status": "shipped", "items": [ { "product_name": "Laptop", "quantity": 1, "price": 1500 }, { "product_name": "Mouse", "quantity": 2, "price": 25 } ], "total_value": 1550 },
+  { "_id": 2, "order_id": "ORD123457", "customer_id": 2, "order_date": ISODate("2023-06-10T10:00:00Z"), "status": "delivered", "items": [ { "product_name": "Tablet", "quantity": 1, "price": 300 }, { "product_name": "Keyboard", "quantity": 1, "price": 50 } ], "total_value": 350 },
+  { "_id": 3, "order_id": "ORD123458", "customer_id": 3, "order_date": ISODate("2023-07-20T11:00:00Z"), "status": "processing", "items": [ { "product_name": "Monitor", "quantity": 1, "price": 200 } ], "total_value": 200 },
+  { "_id": 4, "order_id": "ORD123459", "customer_id": 4, "order_date": ISODate("2023-08-01T09:00:00Z"), "status": "shipped", "items": [ { "product_name": "Headphones", "quantity": 1, "price": 100 }, { "product_name": "Charger", "quantity": 1, "price": 20 } ], "total_value": 120 },
+  { "_id": 5, "order_id": "ORD123460", "customer_id": 5, "order_date": ISODate("2023-09-05T13:00:00Z"), "status": "delivered", "items": [ { "product_name": "Smartphone", "quantity": 1, "price": 800 } ], "total_value": 800 }
+]);
+
+2. Finding Orders for a Specific Customer:
+
+const customer = db.customers.findOne({ name: "John Doe" });
+
+db.orders.find({ customer_id: customer._id });
+
+3. Finding the Customer for a Specific Order:
+
+const order = db.orders.findOne({ order_id: "ORD123456" });
+db.customers.findOne({ _id: order.customer_id });
+
+4. Updating Order Status:
+
+db.orders.updateOne(
+  { order_id: "ORD123456" },
+  { $set: { status: "delivered" } }
+);
+
+5. Deleting an Order:
+
+db.orders.deleteOne({ order_id: "ORD123456" });
+
+Part 2: Aggregation Pipeline
+
+1. Calculating Total Value of All Orders by Customer:
+
+db.orders.aggregate([
+  { $group: { _id: "$customer_id", total_spent: { $sum: "$total_value" } } },
+  {
+    $lookup: {
+      from: "customers",
+      localField: "_id",
+      foreignField: "_id",
+      as: "customer_info"
+    }
+  },
+  { $unwind: "$customer_info" },
+  { $project: { "customer_info.name": 1, total_spent: 1 } }
+]);
+
+2. Grouping Orders by Status:
+
+db.orders.aggregate([
+  { $group: { _id: "$status", count: { $sum: 1 } } }
+]);
+
+3. Listing Customers with Their Recent Orders:
+
+db.orders.aggregate([
+  { $sort: { order_date: -1 } },
+  { $group: { _id: "$customer_id", most_recent_order: { $first: "$$ROOT" } } },
+  {
+    $lookup: {
+      from: "customers",
+      localField: "_id",
+      foreignField: "_id",
+      as: "customer_info"
+    }
+  },
+  { $unwind: "$customer_info" },
+  { $project: { "customer_info.name": 1, "customer_info.email": 1, most_recent_order: 1 } }
+]);
+
+4. Finding the Most Expensive Order by Customer:
+
+db.orders.aggregate([
+  { $sort: { total_value: -1 } },
+  { $group: { _id: "$customer_id", most_expensive_order: { $first: "$$ROOT" } } },
+  {
+    $lookup: {
+      from: "customers",
+      localField: "_id",
+      foreignField: "_id",
+      as: "customer_info"
+    }
+  },
+  { $unwind: "$customer_info" },
+  { $project: { "customer_info.name": 1, most_expensive_order: 1 } }
+]);
+
+Part 3: Real-World Scenario with Relationships
+
+1. Finding All Customers Who Placed Orders in the Last Month
+
+const thirtyDaysAgo = new Date();
+thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+db.orders.aggregate([
+  { $match: { order_date: { $gte: thirtyDaysAgo } } },
+  
+  { $sort: { order_date: -1 } },
+  
+  { $lookup: {
+      from: "customers",
+      localField: "customer_id",
+      foreignField: "_id",
+      as: "customer_info"
+    }
+  },
+
+  { $unwind: "$customer_info" },
+
+  { $project: {
+      _id: 0,
+      "customer_name": "$customer_info.name",
+      "email": "$customer_info.email",
+      "recent_order_date": "$order_date"
+    }
+  }
+]);
+
+2. Finding All Products Ordered by a Specific Customer
+
+const customer = db.customers.findOne({ name: "John Doe" });
+
+db.orders.aggregate([
+  { $match: { customer_id: customer._id } },
+
+  { $unwind: "$items" },
+
+  { $group: {
+      _id: "$items.product_name",
+      total_quantity: { $sum: "$items.quantity" }
+    }
+  },
+
+  { $project: {
+      _id: 0,
+      product_name: "$_id",
+      total_quantity: 1
+    }
+  }
+]);
+
+3. Finding the Top 3 Customers with the Most Expensive Total Orders
+
+db.orders.aggregate([
+  { $group: {
+      _id: "$customer_id",
+      total_spent: { $sum: "$total_value" }
+    }
+  },
+
+  { $sort: { total_spent: -1 } },
+
+  { $limit: 3 },
+
+  { $lookup: {
+      from: "customers",
+      localField: "_id",
+      foreignField: "_id",
+      as: "customer_info"
+    }
+  },
+
+  { $unwind: "$customer_info" },
+
+  { $project: {
+      _id: 0,
+      customer_name: "$customer_info.name",
+      email: "$customer_info.email",
+      total_spent: 1
+    }
+  }
+]);
+
+4. Adding a New Order for an Existing Customer
+
+const janeSmith = db.customers.findOne({ name: "Jane Smith" });
+
+db.orders.insertOne({
+  order_id: "ORD123461",
+  customer_id: janeSmith._id,
+  order_date: new Date(),
+  status: "processing",
+  items: [
+    { product_name: "Smartphone", quantity: 1, price: 800 },
+    { product_name: "Headphones", quantity: 1, price: 100 }
+  ],
+  total_value: 900
+});
+
+
+
+
+
+
+
+
