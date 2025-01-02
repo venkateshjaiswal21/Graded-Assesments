@@ -1,0 +1,116 @@
+body {
+    font-family: "Inter", sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f1f5f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .todo-app {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 10px 10px 20px #d1d9e6, -10px -10px 20px #ffffff;
+    padding: 30px;
+    width: 380px;
+    max-width: 90%;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #334155;
+    font-weight: 700;
+    margin-bottom: 25px;
+  }
+  
+  .task-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  #taskName {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #f1f5f9;
+    box-shadow: inset 6px 6px 12px #d1d9e6, inset -6px -6px 12px #ffffff;
+    color: #334155;
+    font-size: 14px;
+  }
+  
+  #taskName::placeholder {
+    color: #94a3b8;
+  }
+  
+  button {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #e2e8f0, #ffffff);
+    box-shadow: 6px 6px 12px #cbd5e1, -6px -6px 12px #ffffff;
+    color: #334155;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  button:hover {
+    transform: scale(1.05);
+    box-shadow: 8px 8px 16px #cbd5e1, -8px -8px 16px #ffffff;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff;
+    color: #334155;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  li.completed {
+    text-decoration: line-through;
+    color: #94a3b8;
+    background: #e2e8f0;
+  }
+  
+  li span {
+    flex: 1;
+    font-size: 14px;
+  }
+  
+  li button {
+    margin-left: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    background: #e2e8f0;
+    box-shadow: 4px 4px 8px #cbd5e1, -4px -4px 8px #ffffff;
+    color: #334155;
+  }
+  
+  li button:hover {
+    background: linear-gradient(145deg, #ffffff, #e2e8f0);
+  }
+  
+  #taskCounter {
+    text-align: center;
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 20px;
+  }
+  
