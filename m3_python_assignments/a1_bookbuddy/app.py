@@ -5,7 +5,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Valid genres list for validation
 VALID_GENRES = {'Fiction', 'Non-Fiction', 'Mystery', 'Science Fiction', 'Romance', 'Horror', 'Biography', 'History'}
 
 def get_db_connection():
@@ -17,17 +16,14 @@ def get_db_connection():
         return None
 
 def validate_book_data(data, check_required_fields=True):
-    """Validate book data"""
     errors = []
     
-    # Check required fields
     required_fields = {'title', 'author', 'published_year', 'genre'}
     if check_required_fields:
         missing_fields = required_fields - set(data.keys())
         if missing_fields:
             errors.append(f"Missing required fields: {', '.join(missing_fields)}")
     
-    # Validate published_year if provided
     if 'published_year' in data:
         try:
             year = int(data['published_year'])
@@ -37,7 +33,6 @@ def validate_book_data(data, check_required_fields=True):
         except ValueError:
             errors.append("Published year must be a valid number")
     
-    # Validate genre if provided
     if 'genre' in data and data['genre'] not in VALID_GENRES:
         errors.append(f"Genre must be one of: {', '.join(VALID_GENRES)}")
     
@@ -48,7 +43,6 @@ def add_book():
     """Add a new book"""
     data = request.get_json()
     
-    # Validate input data
     errors = validate_book_data(data)
     if errors:
         return jsonify({'error': 'Invalid input', 'messages': errors}), 400
@@ -86,7 +80,6 @@ def get_books():
         query = "SELECT * FROM books"
         params = []
         
-        # Add filters if provided
         if genre or author:
             conditions = []
             if genre:
@@ -134,7 +127,6 @@ def update_book(id):
     """Update a book"""
     data = request.get_json()
     
-    # Validate input data
     errors = validate_book_data(data, check_required_fields=False)
     if errors:
         return jsonify({'error': 'Invalid input', 'messages': errors}), 400
@@ -144,7 +136,6 @@ def update_book(id):
         return jsonify({'error': 'Database connection failed'}), 500
     
     try:
-        # Check if book exists
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM books WHERE id = ?', (id,))
         if cursor.fetchone() is None:
@@ -153,7 +144,6 @@ def update_book(id):
                 'message': 'No book exists with the provided ID'
             }), 404
         
-        # Update only provided fields
         update_fields = []
         params = []
         for field in ['title', 'author', 'published_year', 'genre']:
