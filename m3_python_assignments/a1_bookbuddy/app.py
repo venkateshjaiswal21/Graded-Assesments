@@ -124,7 +124,6 @@ def get_book(id):
 
 @app.route('/books/<int:id>', methods=['PUT'])
 def update_book(id):
-    """Update a book"""
     data = request.get_json()
     
     errors = validate_book_data(data, check_required_fields=False)
@@ -165,7 +164,6 @@ def update_book(id):
 
 @app.route('/books/<int:id>', methods=['DELETE'])
 def delete_book(id):
-    """Delete a book"""
     conn = get_db_connection()
     if conn is None:
         return jsonify({'error': 'Database connection failed'}), 500
